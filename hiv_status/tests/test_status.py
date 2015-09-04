@@ -138,3 +138,11 @@ class TestStatus(TestCase):
         self.assertIsNone(status.documented.result_value)
         self.assertIsNone(status.indirect.result_value)
         self.assertIsNone(status.verbal.result_value)
+
+    def test_current_neg_documented_pos(self):
+        status = Status(subject=self.subject, current=NEG, documented=POS)
+        self.assertEqual(status, NEG)
+
+    def test_current_none_documented_pos(self):
+        status = Status(subject=self.subject, current=None, documented=NEG)
+        self.assertEqual(status, None)

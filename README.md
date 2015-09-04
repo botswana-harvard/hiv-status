@@ -23,40 +23,47 @@ Take a look through the tests, but here are some simple examples.
 	'None'
 	>>> status.result.result_datetime
 	'None'
+	>>> status == None
+	True
+
+Subject is tested for HIV today:
 
 	>>> status = Status(subject, current='POS')
 	>>> str(status)
 	'POS'
 
+Subject shows documentation of HIV(+) status, such as a test result. `Status` returns 'POS':
+
 	>>> status = Status(subject, documented='POS')
 	>>> str(status)
 	'POS'
+
+Subject shows documentation of HIV(-) status, such as a test result. `Status` returns None since a HIV(+) status cannot be eliminated unless the subject gets tested today:
 
 	>>> status = Status(subject, documented='NEG')
 	>>> str(status)
 	'None'
 
+Subject shows documentation of HIV(-) status but tests POS today, `Status` returns 'POS':
+
 	>>> status = Status(subject, current='POS', documented='NEG')
 	>>> str(status)
-	'POS'
+	'POS'	
+	
+Subject shows documentation of HIV(+) status but tests NEG today, `Status` returns 'NEG':
 
 	>>> status = Status(subject, current='NEG', documented='POS')
 	>>> str(status)
 	'None'
 
-	>>> status = Status(subject, indirect='POS')
+Subject claims HIV(+) status but has a prescription for ART, `Status` returns 'POS':
+
+	>>> status = Status(subject, indirect='POS', verbal='NEG', include_verbal=True)
 	>>> str(status)
 	'POS'
+
+Subject claims HIV(+) status but there is no direct or indirect documentation to support this, `Status` returns None:
 
 	>>> status = Status(subject, verbal='POS')
 	>>> str(status)
 	'None'
-
-	>>> status = Status(subject, verbal='POS', include_verbal=True)
-	>>> str(status)
-	'POS'
-
-	>>> status = Status(subject, , verbal='POS')
-	>>> str(status)
-	'None'
-	
