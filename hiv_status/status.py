@@ -101,3 +101,21 @@ class Status:
         else:
             pass
         return visit_options
+
+    @property
+    def subject_aware(self):
+        if self.documented.result_value is not None and self.documented.result_value == self.result.result_value:
+            return True
+        elif self.indirect.result_value == POS and self.current.result_value == POS:
+            return True
+        else:
+            return False
+
+    @property
+    def newly_positive(self):
+        if self.documented.result_value is None and self.result.result_value == POS:
+            return True
+        elif (self.result.result_value == POS and self.documented.result_value != POS):
+            return True
+        else:
+            return False

@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.test import TestCase
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
@@ -146,3 +147,25 @@ class TestStatus(TestCase):
     def test_current_none_documented_pos(self):
         status = Status(subject=self.subject, current=None, documented=NEG)
         self.assertEqual(status, None)
+
+    def test_subject_aware(self):
+        status = Status(subject=self.subject, current=POS)
+        self.assertFalse(status.subject_aware)
+        status = Status(subject=self.subject, documented=POS)
+        self.assertTrue(status.subject_aware)
+        status = Status(subject=self.subject, current=POS, documented=NEG)
+        self.assertFalse(status.subject_aware)
+        status = Status(subject=self.subject, current=NEG, documented=NEG)
+        self.assertTrue(status.subject_aware)
+        status = Status(subject=self.subject, documented=NEG)
+        self.assertFalse(status.subject_aware)
+        status = Status(subject=self.subject, current=POS, indirect=POS)
+        self.assertTrue(status.subject_aware)
+
+    def test_newly_positive(self):
+        status = Status(subject=self.subject, current=POS)
+        self.assertTrue(status.newly_positive)
+        status = Status(subject=self.subject, documented=POS)
+        self.assertFalse(status.newly_positive)
+        status = Status(subject=self.subject, current=POS, documented=NEG)
+        self.assertTrue(status.newly_positive)
