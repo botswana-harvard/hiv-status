@@ -4,6 +4,7 @@ from edc_constants.constants import POS
 from django.core.exceptions import ObjectDoesNotExist
 
 ResultWrapper = namedtuple('ResultWrapper', 'result_value result_datetime, visit_code encounter visit')
+SubjectWrapper = namedtuple('SubjectWrapper', 'id, subject_identifier')
 
 
 class Status:
@@ -18,9 +19,11 @@ class Status:
 
     def __init__(self, subject, current=None, visit_code=None, encounter=None, result_list=None,
                  documented=None, indirect=None,
-                 verbal=None, include_verbal=None):
+                 verbal=None, include_verbal=None, result_wrapper=None, subject_wrapper=None):
         self.new_pos = False
-        self.subject = subject
+        self.result_wrapper = result_wrapper or self._result_wrapper
+        self.subject_wrapper = subject_wrapper or self._subject_wrapper
+        self.subject = self.subject_wrapper(subject)
         if result_list is None:
             self.result_list = [POS]
         else:
@@ -38,7 +41,10 @@ class Status:
             elif self.indirect.result_value == POS:
                 self.result = self.indirect
             elif self.verbal.result_value == POS and self.include_verbal:
-                self.result = self.str_result_wrapper(None) if (self.documented.result_value or self.indirect.result_value) else self.verbal
+                if (self.documented.result_value or self.indirect.result_value):
+                    self.result = self.str_result_wrapper(None)
+                else:
+                    self.result = self.verbal
             else:
                 self.result = self.str_result_wrapper(None)
 
@@ -57,7 +63,7 @@ class Status:
     def __ne__(self, other):
         return self.result.result_value != other
 
-    def result_wrapper(self, result, visit_code, encounter):
+    def _result_wrapper(self, result, visit_code, encounter):
         """Wraps a result which might be a model, instance, string or some custom class."""
         try:
             return ResultWrapper(
@@ -65,7 +71,7 @@ class Status:
         except AttributeError:
             try:
                 result = result.objects.filter(
-                    visit__subject=self.subject, result_value__in=self.result_list,
+                    visit__subject__id=self.subject.id, result_value__in=self.result_list,
                     **self.visit_options(visit_code, encounter)).earliest()
                 return ResultWrapper(
                     result.result_value, result.result_datetime, visit_code, encounter, result.visit)
@@ -82,6 +88,9 @@ class Status:
     def str_result_wrapper(cls, result):
         """Wraps a string result."""
         return ResultWrapper(result, None, None, None, None)
+
+    def _subject_wrapper(self, subject):
+        return SubjectWrapper(subject.id, subject.subject_identifier)
 
     def visit_options(self, visit_code, encounter):
         visit_options = {}

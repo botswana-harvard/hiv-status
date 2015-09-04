@@ -1,0 +1,4 @@
+Django>=1.6
+unipath
+python-dateutil
+-e git+https://github.com/botswana-harvard/edc-constants#egg=edc-constants

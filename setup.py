@@ -10,18 +10,18 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='edc-calendar',
+    name='hiv-status',
     version='0.1.0dev0',
     author=u'Erik van Widenfelt',
     author_email='ew2789@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    url='http://github/botswana-harvard/edc-calendar',
+    url='http://github/botswana-harvard/hiv-status',
     license='GPL license, see LICENSE',
-    description='edc-calendar',
+    description='hiv-status',
     long_description=README,
     zip_safe=False,
-    keywords='django EDC calendar',
+    keywords='django EDC hiv status',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
