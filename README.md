@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/botswana-harvard/hiv-status/badge.svg?branch=develop&service=github)](https://coveralls.io/github/botswana-harvard/hiv-status?branch=develop)
+
 # hiv-status
 
 Determine HIV(+) status based on a combination of documented, indirect and verbal information
