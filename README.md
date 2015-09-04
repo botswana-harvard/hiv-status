@@ -56,7 +56,7 @@ Subject shows documentation of HIV(+) status but tests NEG today, `Status` retur
 	>>> str(status)
 	'None'
 
-Subject claims HIV(+) status but has a prescription for ART, `Status` returns 'POS':
+Subject claims HIV(-) status but has a prescription for ART, `Status` returns 'POS':
 
 	>>> status = Status(subject, indirect='POS', verbal='NEG', include_verbal=True)
 	>>> str(status)
