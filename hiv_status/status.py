@@ -7,6 +7,7 @@ from edc_constants.constants import POS, NEG
 
 from .result_wrapper import ResultWrapper
 from .simple_status import SimpleStatus
+from django.core.exceptions import ObjectDoesNotExist
 
 tz = pytz.timezone(settings.TIME_ZONE)
 
@@ -106,10 +107,11 @@ class Status:
                     result_value = getattr(instance, result_value_attr)
                     result_datetime = getattr(instance, result_datetime_attr)
                     visit = getattr(instance, visit_attr)
-                except result.DoesNotExist:
+                except ObjectDoesNotExist:
                     result_value = None
             except AttributeError as e:
-                if 'object has no attribute \'DoesNotExist\'' in str(e):
+                if ('object has no attribute \'DoesNotExist\'' in str(e) or
+                        'object has no attribute \'objects\'' in str(e)):
                     result_value = result
                     result_datetime = timezone.now()
                 else:
@@ -134,7 +136,7 @@ class Status:
                         options = self.options(name, result_list=[POS])
                         options.update({'{}__lte'.format(result_datetime_attr): self.reference_datetime})
                         instance = result.objects.filter(**options).earliest()
-                    except result.DoesNotExist:
+                    except ObjectDoesNotExist:
                         options = self.options(name, result_list=[NEG])
                         options.update({'{}__lte'.format(result_datetime_attr): self.reference_datetime})
                         instance = result.objects.filter(**options).earliest()
