@@ -42,7 +42,7 @@ class Status:
 
     def __init__(self, subject, tested=None, documented=None, indirect=None, verbal=None,
                  visit_code=None, encounter=None, visit=None, visit_model=None, result_list=None,
-                 reference_date=None):
+                 reference_date=None, include_verbal=None):
         self.subject = subject
         self.visit_code = visit_code
         self.encounter = encounter
@@ -66,7 +66,7 @@ class Status:
         self.verbal = self.lookup_latest(verbal, name='verbal')
         self.result = SimpleStatus(
             tested=self.tested, documented=self.documented,
-            indirect=self.indirect, verbal=self.verbal).result
+            indirect=self.indirect, verbal=self.verbal, include_verbal=include_verbal).result
         if self.result is None:
             self.result = ResultWrapper(None)
 
