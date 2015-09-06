@@ -66,9 +66,9 @@ class HivResult(models.Model):
 
 class HivStatusReview(models.Model):
 
-    subject = models.ForeignKey(Subject)
+    visit = models.ForeignKey(Visit)
 
-    report_datetime = models.DateTimeField()
+    report_datetime = models.DateTimeField(null=True)
 
     documented_result = models.CharField(max_length=10, null=True)
 
