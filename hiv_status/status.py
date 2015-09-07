@@ -135,7 +135,8 @@ class Status:
         if result:
             try:
                 try:
-                    options = self.options(name).update(self.visit_options(name))
+                    options = self.options(name)
+                    options.update(self.visit_options(name))
                     instance = result.objects.filter(**options).latest()
                     result_value_attr, result_datetime_attr, visit_attr = self.attrs(name)
                     result_value = getattr(instance, result_value_attr)
