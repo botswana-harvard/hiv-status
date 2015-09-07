@@ -33,9 +33,8 @@ You can add information about a visit to determine values relative to a timepoin
 
         >>> HivResult.objects.all().count()
         6
-        >>> hiv_result = HivResult.objects.all().order_by('result_datetime')[5]
-        >>> hiv_result.result_value
-        POS
+        >>> [obj.hiv_result for obj in HivResult.objects.all().order_by('result_datetime')]
+        ['NEG', 'POS', 'NEG', 'NEG', 'POS', 'NEG'] 
         >>> status = Status(subject=self.subject, tested=HivResult)
         >>> status.result.result_value
         POS
@@ -45,6 +44,28 @@ You can add information about a visit to determine values relative to a timepoin
         False
         >>> status.subject_aware
         True
+        >>> status.visit
+        (datetime for the 2nd timepoint)
+
+If there is only one POS result:
+
+        >>> HivResult.objects.all().count()
+        6
+        >>> [obj.hiv_result for obj in HivResult.objects.all().order_by('result_datetime')]
+        ['NEG', 'NEG', 'NEG', 'NEG', 'NEG', 'POS'] 
+        >>> status = Status(subject=self.subject, tested=HivResult)
+        >>> status.result.result_value
+        POS
+        >>> status.previous
+        NEG
+        >>> status.newly_positive
+        True
+        >>> status.subject_aware
+        False
+        >>> status.visit
+        (datetime for the 6th timepoint)
+
+Determining if a subject is `newly_positive` and aware of their status, `subject_aware`, also takes into account `documented` and `indirect`.
 
 `Status` and `SimpleStatus` determine the "best" result to use. The choice in order is:
 
