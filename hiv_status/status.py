@@ -16,6 +16,30 @@ SubjectWrapper = namedtuple('SubjectWrapper', 'id, subject_identifier')
 
 class Status:
 
+    """Status is similar to SimpleStatus except the attributes can
+    accept a model class.
+
+    If the model class does not have default attributes, use the
+    Status.lookup_options and Status.field_attr dictionaries.
+
+    This works:
+        >>> status = Status(
+            subject=self.subject, tested=POS, documented=NEG,
+            indirect=NEG, verbal=POS)
+        >>> status.result.result_value
+        'POS'
+
+    And so does this:
+        >>> from .models import HivResult, HivStatusReview
+        >>> status = Status(
+            subject=self.subject, tested=HivResult,
+            documented=HivStatusReview)
+        >>> status.previous
+        'NEG'
+        >>> status.documented
+        'POS'
+    """
+
     SUBJECT_LOOKUP = 0
     RESULT_LOOKUP = 1
     VISIT_CODE_LOOKUP = 2
@@ -58,16 +82,24 @@ class Status:
         self.documented = self.lookup_latest(documented, name='documented')
         if self.documented.result_value and self.previous.result_value:
             if self.previous.result_date > self.documented.result_date:
-                self.documented = SimpleStatus(tested=self.previous, documented=self.documented).result
+                self.documented = SimpleStatus(
+                    tested=self.previous, documented=self.documented
+                ).result
             else:
-                self.documented = SimpleStatus(tested=self.documented, documented=self.previous).result
+                self.documented = SimpleStatus(
+                    tested=self.documented, documented=self.previous
+                ).result
         elif self.previous.result_value:
             self.documented = self.previous
         self.indirect = self.lookup_latest(indirect, name='indirect')
         self.verbal = self.lookup_latest(verbal, name='verbal')
         self.result = SimpleStatus(
-            tested=self.tested, documented=self.documented,
-            indirect=self.indirect, verbal=self.verbal, include_verbal=include_verbal).result
+            tested=self.tested,
+            documented=self.documented,
+            indirect=self.indirect,
+            verbal=self.verbal,
+            include_verbal=include_verbal
+        ).result
         if self.result is None:
             self.result = ResultWrapper(None)
 
@@ -92,6 +124,9 @@ class Status:
             other = ''
         return str(self) != str(other)
 
+    def subject_wrapper(self, subject):
+        return SubjectWrapper(subject.id, subject.subject_identifier)
+
     def lookup_latest(self, result, name):
         result_value = None
         result_datetime = None
@@ -100,8 +135,7 @@ class Status:
         if result:
             try:
                 try:
-                    options = self.options(name)
-                    options.update(self.visit_options(name))
+                    options = self.options(name).update(self.visit_options(name))
                     instance = result.objects.filter(**options).latest()
                     result_value_attr, result_datetime_attr, visit_attr = self.attrs(name)
                     result_value = getattr(instance, result_value_attr)
@@ -156,34 +190,6 @@ class Status:
                 result_value, result_datetime=result_datetime, visit=visit, name=name, instance=instance)
         else:
             return ResultWrapper(None)
-
-    def visit_options(self, name):
-        """Returns the filter lookup of name or the default for the visit based on the
-        values available of visit, visit_code and encounter."""
-        visit_options = {}
-        if self.lookup_options[name]:
-            lookup = self.lookup_options[name]
-        else:
-            lookup = self.lookup_options['default']
-        if self.visit_code and self.encounter:
-            visit_options.update({
-                lookup[self.VISIT_CODE_LOOKUP]: self.visit_code,
-                lookup[self.ENCOUNTER_LOOKUP]: self.encounter})
-        elif self.visit_code:
-            visit_options.update({
-                lookup[self.VISIT_CODE_LOOKUP]: self.visit_code})
-        elif self.visit:
-            try:
-                attrs = self.field_attr[name]
-            except KeyError:
-                attrs = self.field_attr['default']
-            visit_options.update({attrs[self.VISIT_ATTR]: self.visit})
-        else:
-            pass
-        return visit_options
-
-    def subject_wrapper(self, subject):
-        return SubjectWrapper(subject.id, subject.subject_identifier)
 
     @property
     def subject_aware(self):
@@ -251,6 +257,33 @@ class Status:
             result_datetime = self.field_attr['default'][self.RESULT_DATETIME_ATTR]
             visit = self.field_attr['default'][self.VISIT_ATTR]
         return result_value, result_datetime, visit
+
+    def visit_options(self, name):
+        """Returns the filter lookup of name or the default for the visit based on the
+        values available of visit, visit_code and encounter.
+
+        Used to filter the model associated with 'name' on visit."""
+        visit_options = {}
+        if self.lookup_options[name]:
+            lookup = self.lookup_options[name]
+        else:
+            lookup = self.lookup_options['default']
+        if self.visit_code and self.encounter:
+            visit_options.update({
+                lookup[self.VISIT_CODE_LOOKUP]: self.visit_code,
+                lookup[self.ENCOUNTER_LOOKUP]: self.encounter})
+        elif self.visit_code:
+            visit_options.update({
+                lookup[self.VISIT_CODE_LOOKUP]: self.visit_code})
+        elif self.visit:
+            try:
+                attrs = self.field_attr[name]
+            except KeyError:
+                attrs = self.field_attr['default']
+            visit_options.update({attrs[self.VISIT_ATTR]: self.visit})
+        else:
+            pass
+        return visit_options
 
     def zero_time(self, d=None):
         """Returns a datetime with time(0)."""
