@@ -65,6 +65,14 @@ class Status:
         'verbal': []
     }
 
+    get_latest_by = {
+        'default': 'result_datetime',
+        'tested': 'result_datetime',
+        'documented': 'documented_result_date',
+        'indirect': 'subject_visit__report_datetime',
+        'verbal': 'subject_visit__report_datetime'
+    }
+
     def __init__(self, subject, tested=None, documented=None, indirect=None, verbal=None,
                  visit_code=None, encounter=None, visit=None, visit_model=None, result_list=None,
                  reference_date=None, include_verbal=None):
@@ -137,7 +145,8 @@ class Status:
                 try:
                     options = self.options(name)
                     options.update(self.visit_options(name))
-                    instance = result.objects.filter(**options).latest()
+                    instance = result.objects.filter(**options).latest(
+                        self.get_latest_by.get(name, self.get_latest_by.get('default')))
                     result_value_attr, result_datetime_attr, visit_attr = self.attrs(name)
                     result_value = getattr(instance, result_value_attr)
                     result_datetime = getattr(instance, result_datetime_attr)
@@ -175,7 +184,8 @@ class Status:
                     except ObjectDoesNotExist:
                         options = self.options(name, result_list=[NEG])
                         options.update({'{}__lte'.format(result_datetime_attr): self.reference_datetime})
-                        instance = result.objects.filter(**options).earliest()
+                        instance = result.objects.filter(**options).earliest(
+                            self.get_latest_by.get(name, self.get_latest_by.get('default')))
                     if getattr(instance, result_datetime_attr).date() == self.tested.result_datetime.date():
                         result_value = None
                     else:
