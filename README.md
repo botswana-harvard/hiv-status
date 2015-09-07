@@ -57,9 +57,6 @@ You can add information about a visit to determine values relative to a timepoin
 
 For both classes, `SimpleStatus` and `Status`, the parameters `tested, documented, indirect, verbal` all accept a string ('POS', 'NEG' IND', 'UNK'), a model class, or some class with the attributes `result_value`, `result_datetime`, and `visit`. `Status` wraps the string result into a class for consistency (`ResultWrapper`).
 
-Usage
------
-
 Take a look through the tests, but here are some simple examples to demonstrate the logic. These examples work for both classes.
 
 	>>> subject = Subject.objects.create(subject_identifier='12345678')
