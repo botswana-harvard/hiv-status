@@ -111,7 +111,8 @@ class Status:
                     result_value = None
             except AttributeError as e:
                 if ('object has no attribute \'DoesNotExist\'' in str(e) or
-                        'object has no attribute \'objects\'' in str(e)):
+                        'object has no attribute \'objects\'' or
+                        'instance has no attribute \'objects\'' in str(e)):
                     result_value = result
                     result_datetime = timezone.now()
                 else:
@@ -146,7 +147,7 @@ class Status:
                         result_value = getattr(instance, result_value_attr)
                         result_datetime = getattr(instance, result_datetime_attr)
                         visit = getattr(instance, visit_attr)
-                except result.DoesNotExist:
+                except ObjectDoesNotExist:
                     result_value = None
             except AttributeError:
                 result_value = None

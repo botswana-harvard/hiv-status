@@ -1,5 +1,6 @@
 from datetime import date
 
+
 class ResultWrapper:
     """
     >>> a = ResultWrapper('POS')
