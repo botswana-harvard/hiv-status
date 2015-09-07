@@ -29,11 +29,29 @@ Class `Status` adds additional handling of model classes with results instead of
     >>> status.subject_aware
     True
 
+You can add information about a visit to determine values relative to a timepoint. Assume you administer an HIV test over six timepoints where the 2nd and 5th are POS, the others are NEG.  
+
+        >>> HivResult.objects.all().count()
+        6
+        >>> hiv_result = HivResult.objects.all().order_by('result_datetime')[5]
+        >>> hiv_result.result_value
+        POS
+        >>> status = Status(subject=self.subject, tested=HivResult)
+        >>> status.result.result_value
+        POS
+        >>> status.previous
+        POS
+        >>> status.newly_positive
+        False
+        >>> status.subject_aware
+        True
+
 `Status` and `SimpleStatus` determine the "best" result to use. The choice in order is:
-    * today's test (tested);
-    * a documented test (documented);
-    * some evidence of HIV(+) status such as a prescription or medical record (indirect);
-    * Verbal information may be used if deliberately set to do so (verbal, include_verbal=True).
+
+* today's test (tested);
+* a documented test (documented);
+* some evidence of HIV(+) status such as a prescription or medical record (indirect);
+* Verbal information may be used if deliberately set to do so (verbal, include_verbal=True).
 
 `Status` and `SimpleStatus` represents HIV(+) as a string 'POS'. See module `edc-constants`.
 
